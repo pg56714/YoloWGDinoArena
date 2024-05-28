@@ -26,6 +26,8 @@ cd weights
 
 download https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth
 
+put the downloaded file in the weights folder
+
 ### Running the Project
 
 ```bash
