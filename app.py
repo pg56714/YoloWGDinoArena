@@ -91,10 +91,12 @@ text_threshold = gr.Slider(
 # -----------------------------------------------------------------------------------------------------------
 YOLO_WORLD_MODEL = YOLOWorld(model_id="yolo_world/l")
 
-BOUNDING_BOX_ANNOTATOR = sv.BoundingBoxAnnotator()
+BOUNDING_BOX_ANNOTATOR = sv.BoxAnnotator()
 MASK_ANNOTATOR = sv.MaskAnnotator()
 LABEL_ANNOTATOR = sv.LabelAnnotator()
 
+def process_categories(categories: str) -> List[str]:
+    return [category.strip() for category in categories.split(",")]
 
 def annotate_image(
     input_image: np.ndarray,
@@ -121,8 +123,9 @@ def process_image(
     categories: str,
     confidence_threshold: float,
     iou_threshold: float,
+    with_confidence: bool = True,
 ) -> np.ndarray:
-    categories = [category.strip() for category in categories.split(",")]
+    categories = process_categories(categories)
     YOLO_WORLD_MODEL.set_classes(categories)
     results = YOLO_WORLD_MODEL.infer(
         input_image, confidence=confidence_threshold, nms=iou_threshold
@@ -131,13 +134,13 @@ def process_image(
     detections = detections.with_nms(threshold=iou_threshold)
 
     output_image = cv2.cvtColor(input_image, cv2.COLOR_RGB2BGR)
-    labels = [
-        f"{categories[class_id]}: {confidence:.2f}"
-        for class_id, confidence in zip(detections.class_id, detections.confidence)
-    ]
-    output_image = MASK_ANNOTATOR.annotate(output_image, detections)
-    output_image = BOUNDING_BOX_ANNOTATOR.annotate(output_image, detections)
-    output_image = LABEL_ANNOTATOR.annotate(output_image, detections, labels=labels)
+    output_image = annotate_image(
+        input_image=output_image,
+        detections=detections,
+        categories=categories,
+        with_confidence=with_confidence,
+    )
+
     return cv2.cvtColor(output_image, cv2.COLOR_BGR2RGB)
 
 
@@ -176,27 +179,29 @@ iou_threshold_component = gr.Slider(
 with gr.Blocks() as demo:
     gr.Markdown(MARKDOWN)
     with gr.Row():
-        with gr.Column():
-            input_image_component = gr.Image(type="numpy", label="Input Image")
-            with gr.Accordion("YOLO-World", open=False):
-                confidence_threshold_component.render()
-                iou_threshold_component.render()
-
-            with gr.Accordion("GroundingDINO", open=False):
-                box_threshold.render()
-                text_threshold.render()
-
-            image_text_component = gr.Textbox(
-                placeholder="you can input multiple words with comma (,)",
-            )
-
+        input_image_component = gr.Image(type="numpy", label="Input Image")
         yolo_world_output_image_component = gr.Image(
             type="numpy", label="YOLO-WORLD Output"
         )
         grounding_dion_output_image_component = gr.Image(
             type="pil", label="GroundingDINO Output"
         )
-    submit_button_component = gr.Button(value="Submit", scale=1, variant="primary")
+    with gr.Row():
+        image_text_component = gr.Textbox(
+            label="Categories",
+            placeholder="you can input multiple words with comma (,)",
+            scale=7,
+        )
+        submit_button_component = gr.Button(value="Submit", scale=1, variant="primary")
+        
+    with gr.Column():
+        with gr.Accordion("YOLO-World", open=False):
+            confidence_threshold_component.render()
+            iou_threshold_component.render()
+
+        with gr.Accordion("GroundingDINO", open=False):
+            box_threshold.render()
+            text_threshold.render()
 
     submit_button_component.click(
         fn=process_image,
