@@ -1,7 +1,7 @@
 gradio==4.19.2
-inference==0.9.15
-inference-gpu[yolo-world]
-supervision==0.20.0
+# inference==0.15.0
+inference-gpu[yolo-world]==0.15.0
+supervision
 torch
 torchvision
 transformers
