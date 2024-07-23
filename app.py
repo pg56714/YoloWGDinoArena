@@ -8,7 +8,8 @@ from PIL import Image
 import warnings
 
 warnings.filterwarnings("ignore")
-from groundingdino.util.inference import annotate, predict, load_model
+from groundingdino.util.inference import annotate as gd_annotate
+from groundingdino.util.inference import predict, load_model
 import groundingdino.datasets.transforms as T
 
 MARKDOWN = """
@@ -62,7 +63,7 @@ def run_grounding(input_image, grounding_caption, box_threshold, text_threshold)
         text_threshold,
         device="cpu",
     )
-    annotated_frame = annotate(
+    annotated_frame = gd_annotate(
         image_source=np.asarray(image_pil), boxes=boxes, logits=logits, phrases=phrases
     )
     image_with_box = Image.fromarray(cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB))
