@@ -1,5 +1,7 @@
 # YoloWGDinoArena
 
+YOLOWorld vs GroundingDINO Arena
+
 [HuggingFace Space](https://huggingface.co/spaces/pg56714/YoloWGDinoArena)
 
 ## Getting Started
