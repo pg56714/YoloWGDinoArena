@@ -14,10 +14,12 @@ setting CUDA_HOME
 https://zhuanlan.zhihu.com/p/565649540s
 
 ```bash
-# Create and activate a python 3.10 environment.
-conda create -n yolowgdinoarena python=3.10 -y
+# Create and activate a python 3.12 environment.
+conda create -n yolowgdinoarena python=3.12 -y
 
 conda activate yolowgdinoarena
+
+pip install -r requirements.txt
 
 pip install -e .
 ```

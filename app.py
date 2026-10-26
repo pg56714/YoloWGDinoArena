@@ -2,6 +2,7 @@ from typing import List
 import cv2
 import gradio as gr
 import numpy as np
+import torch
 import supervision as sv
 from inference.models import YOLOWorld
 from PIL import Image
@@ -63,7 +64,7 @@ def run_grounding(input_image, grounding_caption, box_threshold, text_threshold)
         grounding_caption,
         box_threshold,
         text_threshold,
-        device="cpu",
+        device="cuda" if torch.cuda.is_available() else "cpu",
     )
     annotated_frame = gd_annotate(
         image_source=np.asarray(image_pil), boxes=boxes, logits=logits, phrases=phrases

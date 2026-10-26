@@ -24,9 +24,41 @@ class BertModelWarper(nn.Module):
         self.encoder = bert_model.encoder
         self.pooler = bert_model.pooler
 
-        self.get_extended_attention_mask = bert_model.get_extended_attention_mask
-        self.invert_attention_mask = bert_model.invert_attention_mask
-        self.get_head_mask = bert_model.get_head_mask
+        # transformers 5 changed the third argument of get_extended_attention_mask from
+        # device to dtype and later removed these helpers, so use local versions.
+        self.get_extended_attention_mask = self._get_extended_attention_mask
+        self.invert_attention_mask = getattr(
+            bert_model, "invert_attention_mask", self._invert_attention_mask
+        )
+        self.get_head_mask = getattr(bert_model, "get_head_mask", self._get_head_mask)
+
+    def _mask_dtype(self):
+        return next(self.parameters()).dtype
+
+    def _get_extended_attention_mask(self, attention_mask, input_shape, device=None):
+        if attention_mask.dim() == 3:
+            extended = attention_mask[:, None, :, :]
+        elif attention_mask.dim() == 2:
+            extended = attention_mask[:, None, None, :]
+        else:
+            raise ValueError(f"Wrong shape for attention_mask (shape {attention_mask.shape})")
+        dtype = self._mask_dtype()
+        extended = extended.to(dtype=dtype)
+        return (1.0 - extended) * torch.finfo(dtype).min
+
+    def _invert_attention_mask(self, encoder_attention_mask):
+        if encoder_attention_mask.dim() == 3:
+            extended = encoder_attention_mask[:, None, :, :]
+        else:
+            extended = encoder_attention_mask[:, None, None, :]
+        dtype = self._mask_dtype()
+        extended = extended.to(dtype=dtype)
+        return (1.0 - extended) * torch.finfo(dtype).min
+
+    def _get_head_mask(self, head_mask, num_hidden_layers):
+        if head_mask is None:
+            return [None] * num_hidden_layers
+        raise NotImplementedError("head_mask is not supported with this transformers version")
 
     def forward(
         self,
