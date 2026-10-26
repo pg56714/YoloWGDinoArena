@@ -14,10 +14,12 @@ setting CUDA_HOME
 https://zhuanlan.zhihu.com/p/565649540s
 
 ```bash
-# Create and activate a python 3.10 environment.
-conda create -n yolowgdinoarena python=3.10 -y
+# Create and activate a python 3.12 environment.
+conda create -n yolowgdinoarena python=3.12 -y
 
 conda activate yolowgdinoarena
+
+pip install -r requirements.txt
 
 pip install -e .
 ```
@@ -35,7 +37,3 @@ put the downloaded file in the weights folder
 ```bash
 python app.py
 ```
-
-## Security
-
-Dependency upgrades and the known remaining issues are recorded in [docs/security-log.md](docs/security-log.md) ([繁體中文](docs/security-log.zh-TW.md)).

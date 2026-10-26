@@ -24,10 +24,9 @@ class BertModelWarper(nn.Module):
         self.encoder = bert_model.encoder
         self.pooler = bert_model.pooler
 
-        # transformers 5 removed these helpers from BertModel; fall back to local versions.
-        self.get_extended_attention_mask = getattr(
-            bert_model, "get_extended_attention_mask", self._get_extended_attention_mask
-        )
+        # transformers 5 changed the third argument of get_extended_attention_mask from
+        # device to dtype and later removed these helpers, so use local versions.
+        self.get_extended_attention_mask = self._get_extended_attention_mask
         self.invert_attention_mask = getattr(
             bert_model, "invert_attention_mask", self._invert_attention_mask
         )
