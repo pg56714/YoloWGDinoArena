@@ -1,5 +1,7 @@
 # YoloWGDinoArena
 
+> **Security:** see [SECURITY.md](SECURITY.md) for known dependency issues.
+
 YOLOWorld vs GroundingDINO Arena
 
 [HuggingFace Space](https://huggingface.co/spaces/pg56714/YoloWGDinoArena)
